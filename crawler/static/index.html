@@ -1,0 +1,118 @@
+<body>
+  <div id="splitter">
+    <div style="flex: 0.5;">
+      <div>
+        <input id="url" type="text" placeholder="Start URL..."/>
+        <button id="start" onclick="start()">Crawl</button>
+        <button id="showNew" onclick="showNew()">Show New</button>
+      </div>
+      <div id="domains"></div>
+    </div>
+    <div style="flex: 1;">
+      <iframe id="iframe"></iframe>
+    </div>
+  </div>
+</body>
+<style>
+    #splitter {
+        display:flex;
+        flex-direction:row;
+        gap:1em;
+    }
+    .panel {
+      flex: 1;
+    }
+    #domains {
+        display:flex;
+        flex-direction:column;
+        gap:0.5em;
+    }
+    #domains * {
+        display:flex;
+        justify-content: space-between;
+    }
+    #domains button {
+        margin-left: 1em;
+    }
+    #iframe {
+        width: 100%;
+        height: 80vh;
+    }
+</style>
+<script>
+  function showNew() {
+    fetch("/getNew")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        var domains = document.getElementById("domains");
+        domains.innerHTML = "";
+        if (!data.domains) return
+        for (let domainName of data.domains) {
+          let domain = document.createElement("div");
+          domain.innerHTML = domainName;
+            let div = document.createElement("div");
+
+          let button = document.createElement("button");
+          button.innerHTML = "View";
+          button.onclick = function () {
+            setIframe("http://" + domainName);
+          };
+          domain.appendChild(button);
+          let button2 = document.createElement("button");
+          button2.innerHTML = "Approve";
+          button2.onclick = function () {
+            approve(domainName);
+          };
+          domain.appendChild(button);
+          let button3 = document.createElement("button");
+          button3.innerHTML = "Reject";
+          button3.onclick = function () {
+            reject(domainName);
+          };
+
+          div.appendChild(button);
+          div.appendChild(button2);
+          div.appendChild(button3);
+          domain.appendChild(div);
+          domains.appendChild(domain);
+        }
+        if (data?.domains?.length > 0) {
+          setIframe("http://" + data.domains[0]);
+        }
+      });
+  }
+
+  function setIframe(url) {
+    var iframe = document.getElementById("iframe");
+    iframe.src = url;
+  }
+
+  function approve(url) {
+    fetch("/approve", {
+      method: "POST",
+      body: JSON.stringify({
+        url: url,
+      }),
+    }).then((response) => showNew());
+  }
+
+  function reject(url) {
+    fetch("/reject", {
+      method: "POST",
+      body: JSON.stringify({
+        url: url,
+      }),
+    }).then((response) => showNew());
+  }
+
+  function start() {
+    console.log("Starting...");
+    let url = document.getElementById("url").value;
+    document.getElementById("url").value = "";
+    console.log("Starting from:", url)
+    approve(url)
+  }
+
+  showNew();
+</script>
