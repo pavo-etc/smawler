@@ -1,43 +1,44 @@
 <body>
   <div id="splitter">
-    <div style="flex: 0.5;">
+    <div style="flex: 0.5">
       <div>
-        <input id="url" type="text" placeholder="Start URL..."/>
+        <input id="url" type="text" placeholder="Start URL..." />
         <button id="start" onclick="start()">Crawl</button>
         <button id="showNew" onclick="showNew()">Show New</button>
+        <a href="/graph.html">Graph</a>
       </div>
       <div id="domains"></div>
     </div>
-    <div style="flex: 1;">
+    <div style="flex: 1">
       <iframe id="iframe"></iframe>
     </div>
   </div>
 </body>
 <style>
-    #splitter {
-        display:flex;
-        flex-direction:row;
-        gap:1em;
-    }
-    .panel {
-      flex: 1;
-    }
-    #domains {
-        display:flex;
-        flex-direction:column;
-        gap:0.5em;
-    }
-    #domains * {
-        display:flex;
-        justify-content: space-between;
-    }
-    #domains button {
-        margin-left: 1em;
-    }
-    #iframe {
-        width: 100%;
-        height: 80vh;
-    }
+  #splitter {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+  }
+  .panel {
+    flex: 1;
+  }
+  #domains {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+  }
+  #domains * {
+    display: flex;
+    justify-content: space-between;
+  }
+  #domains button {
+    margin-left: 1em;
+  }
+  #iframe {
+    width: 100%;
+    height: 80vh;
+  }
 </style>
 <script>
   function showNew() {
@@ -47,11 +48,11 @@
         console.log(data);
         var domains = document.getElementById("domains");
         domains.innerHTML = "";
-        if (!data.domains) return
+        if (!data.domains) return;
         for (let domainName of data.domains) {
           let domain = document.createElement("div");
           domain.innerHTML = domainName;
-            let div = document.createElement("div");
+          let div = document.createElement("div");
 
           let button = document.createElement("button");
           button.innerHTML = "View";
@@ -110,8 +111,8 @@
     console.log("Starting...");
     let url = document.getElementById("url").value;
     document.getElementById("url").value = "";
-    console.log("Starting from:", url)
-    approve(url)
+    console.log("Starting from:", url);
+    approve(url);
   }
 
   showNew();

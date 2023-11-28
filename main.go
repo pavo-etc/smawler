@@ -51,6 +51,7 @@ func main() {
 	http.HandleFunc("/reject", rejectHandler)
 	http.HandleFunc("/approve", approveHandler)
 	http.HandleFunc("/getNew", getNewHandler)
+	http.HandleFunc("/getGraph", getGraphHandler)
 
 	err := http.ListenAndServe(":3000", nil)
 	if errors.Is(err, http.ErrServerClosed) {
@@ -102,5 +103,13 @@ func getNewHandler(w http.ResponseWriter, r *http.Request) {
 	// domains is a slice of strings
 	// send res {domains: domains}
 	res := map[string][]string{"domains": domains}
+	json.NewEncoder(w).Encode(res)
+}
+
+func getGraphHandler(w http.ResponseWriter, r *http.Request) {
+	links := GetGraph()
+
+	// domains is a slice of strings
+	res := map[string][]Link{"links": links}
 	json.NewEncoder(w).Encode(res)
 }

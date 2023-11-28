@@ -1,0 +1,97 @@
+<body>
+  <div id="cy"></div>
+</body>
+<style>
+  #cy {
+    width: 100v;
+    height: 100vh;
+    display: block;
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.27.0/cytoscape.min.js"></script>
+<script>
+  async function getGraphData() {
+    let externalLinks = {};
+
+    /** @type {{
+     * start_domain: string,
+     * end_domain: string,
+     * start_url: string,
+     * end_url: string,
+     * }[]} */
+    let tableData = await fetch("/getGraph").then((response) =>
+      response.json()
+    );
+    console.log(tableData);
+
+    for (let row of tableData.links) {
+      if (externalLinks[row.start_domain]) {
+        externalLinks[row.start_domain].push(row.end_domain);
+      } else {
+        externalLinks[row.start_domain] = [row.end_domain];
+      }
+    }
+
+    console.log(externalLinks);
+
+    let elements = [];
+
+    for (let node of Object.keys(externalLinks)) {
+      elements.push({
+        data: {
+          id: node,
+        },
+      });
+    }
+
+    for (let [start, links] of Object.entries(externalLinks)) {
+      for (let link of links) {
+        elements.push({
+          data: {
+            id: `${start}-${link}`,
+            source: start,
+            target: link,
+          },
+        });
+        elements.push({
+          data: {
+            id: link,
+          },
+        });
+      }
+    }
+    console.log(elements);
+    var cy = cytoscape({
+      container: document.getElementById("cy"), // container to render in
+      elements: elements,
+
+      style: [
+        // the stylesheet for the graph
+        {
+          selector: "node",
+          style: {
+            "background-color": "#666",
+            label: "data(id)",
+          },
+        },
+
+        {
+          selector: "edge",
+          style: {
+            width: 3,
+            "line-color": "#ccc",
+            "target-arrow-color": "#ccc",
+            "target-arrow-shape": "triangle",
+            "curve-style": "bezier",
+          },
+        },
+      ],
+
+      layout: {
+        name: "concentric",
+        gravity: 0.5,
+      },
+    });
+  }
+  getGraphData();
+</script>

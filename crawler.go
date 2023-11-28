@@ -223,3 +223,58 @@ func CrawlDomain(url string) {
 
 	completeDomain(url)
 }
+
+type Link struct {
+	StartDomain string `json:"start_domain"`
+	EndDomain   string `json:"end_domain"`
+	StartURL    string `json:"start_url"`
+	EndURL      string `json:"end_url"`
+}
+
+func GetGraph() []Link {
+
+	db, _ := sql.Open("sqlite3", "./crawler.db?_busy_timeout="+strconv.Itoa(TIMEOUT))
+	if db == nil {
+		log.Fatal("db nil")
+	}
+	defer db.Close() // Defer Closing the database
+
+	row, err := db.Query(
+		`
+			SELECT DISTINCT 
+				link.start_domain,
+				link.end_domain,
+				link.start_url,
+				link.end_url
+			FROM domain LEFT JOIN link
+				ON domain.domain = link.end_domain
+			WHERE 
+				domain.valid > 0
+				AND link.start_domain != link.end_domain
+			GROUP BY link.start_domain, link.end_domain
+			--LIMIT 10
+			;
+		`,
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer row.Close()
+	var links []Link
+	for row.Next() { // Iterate and fetch the records from result cursor
+		var start_domain string
+		var end_domain string
+		var start_url string
+		var end_url string
+		row.Scan(&start_domain, &end_domain, &start_url, &end_url)
+		links = append(links, Link{
+			StartDomain: start_domain,
+			EndDomain:   end_domain,
+			StartURL:    start_url,
+			EndURL:      end_url,
+		})
+	}
+	fmt.Println(links)
+	return links
+
+}
